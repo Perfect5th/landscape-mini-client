@@ -2,3 +2,5 @@
 
 This is a mini-fied version of the Landscape Client. Minimally
 compatible with minimal dependencies.
+
+Intended to be used for testing.
