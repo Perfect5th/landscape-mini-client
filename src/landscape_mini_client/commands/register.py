@@ -1,4 +1,5 @@
 import argparse
+import logging
 import socket
 import time
 from typing import List, Mapping, Union
@@ -66,10 +67,9 @@ def register(args: argparse.Namespace) -> None:
     }
 
     pickled = pickle(message)
-    breakpoint()
 
     response = requests.post(
-        "https://10.76.244.123/message-system",
+        f"https://{args.server_host}/message-system",
         data=pickled.encode(),
         verify=False,
         headers={
@@ -79,4 +79,5 @@ def register(args: argparse.Namespace) -> None:
         },
     )
 
-    print(response)
+    if response.status_code == 200:
+        logging.info("Registration request successful")
