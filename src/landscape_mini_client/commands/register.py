@@ -2,54 +2,21 @@ import argparse
 import logging
 import socket
 import time
-from typing import List, Mapping, Union
+import warnings
 
 import requests
+import sys
+print(sys.path[0])
+print(__name__)
 
-
-def pickle_dict(payload: Mapping[str, Union[dict, list, str, int]]) -> str:
-    pickled = ["d"]
-
-    for k, v in payload.items():
-        pickled.append(f"u{len(k)}:{k}")
-        pickled.append(pickle(v))
-
-    pickled.append(";")
-    pickled = "".join(pickled)
-
-    return pickled
-
-
-def pickle_list(payload: List[Union[dict, list, str, int]]) -> str:
-    pickled = ["l"]
-
-    for v in payload:
-        pickled.append(pickle(v))
-
-    pickled.append(";")
-    pickled = "".join(pickled)
-
-    return pickled
-
-
-def pickle(payload: Union[dict, list, str, int]) -> str:
-    """Simple pickler based on landscape.lib.bpickle."""
-
-    if isinstance(payload, dict):
-        return pickle_dict(payload)
-
-    if isinstance(payload, list):
-        return pickle_list(payload)
-
-    if isinstance(payload, str):
-        return f"u{len(payload)}:{payload}"
-
-    if isinstance(payload, int):
-        return f"i{payload};"
+from ..util import bpickle
 
 
 def register(args: argparse.Namespace) -> None:
     """Registers this client with a Landscape Server instance."""
+
+    if not args.verify:
+        warnings.filterwarnings("ignore", message="unverified https")
 
     message = {
         "messages": [{
@@ -66,18 +33,25 @@ def register(args: argparse.Namespace) -> None:
         }]
     }
 
-    pickled = pickle(message)
+    pickled = bpickle.dumps(message)
 
-    response = requests.post(
-        f"https://{args.server_host}/message-system",
-        data=pickled.encode(),
-        verify=False,
-        headers={
-            "User-Agent": "landscape-client/18.01-0ubuntu13",
-            "X-Message-Api": "3.3",
-            "Content-Type": "application/octet-stream",
-        },
-    )
-
-    if response.status_code == 200:
-        logging.info("Registration request successful")
+    try:
+        response = requests.post(
+            f"{args.protocol}://{args.server_host}:{args.port}/message-system",
+            data=pickled.encode(),
+            verify=args.verify,
+            headers={
+                "User-Agent": "landscape--mini-client/0.0.1",
+                "X-Message-Api": "3.3",
+                "Content-Type": "application/octet-stream",
+            },
+        )
+    except requests.exceptions.ConnectTimeout:
+        logging.error(f"Connection to {args.server_host} timed out")
+    else:
+        if response.status_code == 200:
+            logging.info("Registration request successful")
+            logging.debug(f"Response 200: {response.content}")
+        else:
+            logging.error(f"Registration failed. Response "
+                          f"{response.status_code}: {response.content}")

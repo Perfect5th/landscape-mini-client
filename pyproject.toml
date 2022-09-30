@@ -21,3 +21,6 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/perfect5th/landscape-mini-client"
 "Bug Tracker" = "https://github.com/perfect5th/landscape-mini-client/issues"
+
+[project.scripts]
+landscape-mini-client = "src.landscape_mini_client.main:main"
