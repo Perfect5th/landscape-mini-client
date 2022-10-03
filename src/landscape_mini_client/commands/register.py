@@ -5,9 +5,6 @@ import time
 import warnings
 
 import requests
-import sys
-print(sys.path[0])
-print(__name__)
 
 from ..util import bpickle
 
@@ -41,7 +38,7 @@ def register(args: argparse.Namespace) -> None:
             data=pickled.encode(),
             verify=args.verify,
             headers={
-                "User-Agent": "landscape--mini-client/0.0.1",
+                "User-Agent": "landscape-mini-client/0.0.1",
                 "X-Message-Api": "3.3",
                 "Content-Type": "application/octet-stream",
             },
