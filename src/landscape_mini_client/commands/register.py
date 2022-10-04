@@ -52,3 +52,7 @@ def register(args: argparse.Namespace) -> None:
         else:
             logging.error(f"Registration failed. Response "
                           f"{response.status_code}: {response.content}")
+
+        payload, _ = bpickle.loads(response.content)
+
+        logging.info(f"Received message: {payload}")
