@@ -26,7 +26,7 @@ def main():
     parser_register.add_argument("--container-info", default="")
     parser_register.add_argument("--vm-info", default="")
     parser_register.add_argument("--protocol", default="https")
-    parser_register.add_argument("--port", default=443)
+    parser_register.add_argument("--port", default="")
     parser_register.add_argument(
         "--no-verify", action="store_false", dest="verify",
         help="Do not verify SSL/TLS")

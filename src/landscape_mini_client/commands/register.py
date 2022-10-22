@@ -28,9 +28,11 @@ def register(args: argparse.Namespace) -> None:
         }]
     }
 
+    port = f":{args.port}" if args.port else ""
+
     try:
         status_code, payload = send_message(
-            f"{args.protocol}://{args.server_host}:{args.port}/message-system",
+            f"{args.protocol}://{args.server_host}{port}/message-system",
             message,
             verify=args.verify,
             timeout=args.timeout,

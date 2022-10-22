@@ -1,7 +1,7 @@
 from argparse import Namespace
 from logging import ERROR, INFO
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from ...messages import MessageException
 from ..register import register
@@ -18,7 +18,7 @@ class RegisterTestCase(TestCase):
         vm_info="",
         protocol="http",
         server_host="localhost",
-        port="8080",
+        port="",
         timeout=5,
         verify=False,
     )
@@ -79,3 +79,28 @@ class RegisterTestCase(TestCase):
 
         self.assertEqual(len(logging.records), 1)
         self.assertIn("failed", logging.output[0])
+
+    def test_register_specified_port(self):
+        """Tests that we use the specified port if it is provided."""
+        self.send_message_mock.return_value = (200, "test")
+
+        register(Namespace(
+            verify=False,
+            account_name="test",
+            computer_title="test",
+            registration_key="test",
+            tags="test",
+            container_info="test",
+            vm_info="test",
+            port="8080",
+            protocol="http",
+            server_host="localhost",
+            timeout=5,
+        ))
+
+        self.send_message_mock.assert_called_once_with(
+            "http://localhost:8080/message-system",
+            ANY,
+            verify=False,
+            timeout=5,
+        )
