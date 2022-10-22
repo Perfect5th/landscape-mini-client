@@ -4,9 +4,7 @@ import socket
 import time
 import warnings
 
-import requests
-
-from ..util import bpickle
+from ..messages import MessageException, send_message
 
 
 def register(args: argparse.Namespace) -> None:
@@ -30,29 +28,19 @@ def register(args: argparse.Namespace) -> None:
         }]
     }
 
-    pickled = bpickle.dumps(message)
-
     try:
-        response = requests.post(
+        status_code, payload = send_message(
             f"{args.protocol}://{args.server_host}:{args.port}/message-system",
-            data=pickled.encode(),
+            message,
             verify=args.verify,
-            headers={
-                "User-Agent": "landscape-mini-client/0.0.1",
-                "X-Message-Api": "3.3",
-                "Content-Type": "application/octet-stream",
-            },
+            timeout=args.timeout,
         )
-    except requests.exceptions.ConnectTimeout:
-        logging.error(f"Connection to {args.server_host} timed out")
+    except MessageException:
+        logging.error("Registration failed.")
     else:
-        if response.status_code == 200:
+        if status_code == 200:
             logging.info("Registration request successful")
-            logging.debug(f"Response 200: {response.content}")
         else:
-            logging.error(f"Registration failed. Response "
-                          f"{response.status_code}: {response.content}")
-
-        payload, _ = bpickle.loads(response.content)
+            logging.error(f"Registration failed. Response {status_code}")
 
         logging.info(f"Received message: {payload}")

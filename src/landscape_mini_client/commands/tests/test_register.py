@@ -1,61 +1,81 @@
 from argparse import Namespace
-from http.server import HTTPServer, HTTPStatus, BaseHTTPRequestHandler
-from threading import Thread
-from typing import Callable
+from logging import ERROR, INFO
 from unittest import TestCase
+from unittest.mock import patch
 
-import requests
-
+from ...messages import MessageException
 from ..register import register
-
-
-class MockHTTPRequestHandler(BaseHTTPRequestHandler):
-    get_callback = lambda self: ""
-
-    def do_HEAD(self):
-        self.send_response(HTTPStatus.OK)
-
-    def do_GET(self):
-        response = self.get_callback().encode()
-
-        self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "application/octet-stream")
-        self.send_header("Content-Length", len(response))
-        self.end_headers()
-
-        self.wfile.write(response)
-
-    def do_POST(self):
-        self.do_GET()
-
-
-def start_test_server(**kwargs) -> HTTPServer:
-    if "get_callback" in kwargs:
-        MockHTTPRequestHandler.get_callback = kwargs["get_callback"]
-
-    server = HTTPServer(('localhost', 8081), MockHTTPRequestHandler)
-
-    thread = Thread(target=server.serve_forever)
-    thread.start()
-
-    return server
 
 
 class RegisterTestCase(TestCase):
 
-    def test_register(self):
-        server = start_test_server(get_callback=lambda self: "Hello, world!")
-        self.addCleanup(server.shutdown)
+    namespace = Namespace(
+        account_name="test",
+        computer_title="test",
+        registration_key="",
+        tags="",
+        container_info="",
+        vm_info="",
+        protocol="http",
+        server_host="localhost",
+        port="8080",
+        timeout=5,
+        verify=False,
+    )
 
-        register(Namespace(
-            account_name="test",
-            computer_title="test",
-            server_host=server.server_address[0],
-            port=server.server_port,
-            verify=False,
-            registration_key="",
-            tags="",
-            container_info="",
-            vm_info="",
-            protocol="http",
-        ))
+    def setUp(self):
+        super().setUp()
+
+        self.send_message_mock = patch(
+            register.__module__ + ".send_message").start()
+
+        self.addCleanup(patch.stopall)
+
+    def test_register(self):
+        """Happy path test."""
+        self.send_message_mock.return_value = (200, "test")
+
+        with self.assertLogs(level=INFO) as logging:
+            register(self.namespace)
+
+        self.assertEqual(len(logging.records), 2)
+        self.assertIn("successful", logging.output[0])
+
+    def test_register_suppress_warnings(self):
+        """
+        Tests that https warnings are filtered when args.verify is
+        False.
+        """
+        self.send_message_mock.return_value = (200, "test")
+
+        with patch("warnings.filterwarnings") as filterwarnings_mock:
+            register(self.namespace)
+
+        filterwarnings_mock.assert_called_once_with(
+            "ignore", message="unverified https")
+
+    def test_register_message_exception(self):
+        """
+        Tests that we log an error when send_message raises a
+        MessageException.
+        """
+        self.send_message_mock.side_effect = MessageException()
+
+        with self.assertLogs(level=ERROR) as logging:
+            register(self.namespace)
+
+        self.assertEqual(len(logging.records), 1)
+        self.assertIn("failed", logging.output[0])
+
+    def test_register_bad_status_code(self):
+        """
+        Tests that we log an error when send_message returns a non-200
+        status_code.
+        """
+        self.send_message_mock.return_value = (400, None)
+
+        with self.assertLogs(level=ERROR) as logging:
+            register(self.namespace)
+
+        self.assertEqual(len(logging.records), 1)
+        self.assertIn("failed", logging.output[0])

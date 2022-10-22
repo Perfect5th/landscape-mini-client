@@ -1,9 +1,9 @@
 """Simple pickler based on landscape.lib.bpickle."""
 
-from typing import List, Mapping, Union
+from typing import List, Mapping, Tuple, Union
 
 
-def dumps(payload: Union[dict, list, str, int]) -> str:
+def dumps(payload: Union[dict, list, str, int]) -> bytes:
     if isinstance(payload, dict):
         return _dumps_dict(payload)
 
@@ -11,38 +11,41 @@ def dumps(payload: Union[dict, list, str, int]) -> str:
         return _dumps_list(payload)
 
     if isinstance(payload, str):
-        return f"u{len(payload)}:{payload}"
+        return f"u{len(payload)}:{payload}".encode()
+
+    if isinstance(payload, bytes):
+        return f"b{len(payload)}:".encode() + payload
 
     if isinstance(payload, int):
-        return f"i{payload};"
+        return f"i{payload};".encode()
 
 
-def _dumps_dict(payload: Mapping[str, Union[dict, list, str, int]]) -> str:
-    pickled = ["d"]
+def _dumps_dict(payload: Mapping[str, Union[dict, list, str, int]]) -> bytes:
+    pickled = [b"d"]
 
     for k, v in payload.items():
-        pickled.append(f"u{len(k)}:{k}")
+        pickled.append(f"u{len(k)}:{k}".encode())
         pickled.append(dumps(v))
 
-    pickled.append(";")
-    pickled = "".join(pickled)
+    pickled.append(b";")
+    pickled = b"".join(pickled)
 
     return pickled
 
 
-def _dumps_list(payload: List[Union[dict, list, str, int]]) -> str:
-    pickled = ["l"]
+def _dumps_list(payload: List[Union[dict, list, str, int]]) -> bytes:
+    pickled = [b"l"]
 
     for v in payload:
         pickled.append(dumps(v))
 
-    pickled.append(";")
-    pickled = "".join(pickled)
+    pickled.append(b";")
+    pickled = b"".join(pickled)
 
     return pickled
 
 
-def loads(payload: bytes) -> tuple[Union[dict, list, str, int], int]:
+def loads(payload: bytes) -> Tuple[Union[dict, list, str, int], int]:
     typecode = chr(payload[0])
     
     if typecode == "d":
@@ -63,13 +66,19 @@ def loads(payload: bytes) -> tuple[Union[dict, list, str, int], int]:
         bytestring = rest[:length]
         return bytestring, length + len(f"s{length}:")
 
+    if typecode == "b":
+        length, rest = payload[1:].split(b":", maxsplit=1)
+        length = int(length)
+        bytestring = rest[:length]
+        return bytestring, length + len(f"b{length}:")
+
     if typecode == "i":
         length = payload.find(b";", 1)
         number = int(payload[1:length])
         return number, len(f"i{number};")
 
 
-def loads_dict(payload: bytes) -> tuple[dict, int]:
+def loads_dict(payload: bytes) -> Tuple[dict, int]:
     index = 1
     result = {}
 
@@ -84,7 +93,7 @@ def loads_dict(payload: bytes) -> tuple[dict, int]:
     return result, index + 1
 
 
-def loads_list(payload: bytes) -> tuple[list, int]:
+def loads_list(payload: bytes) -> Tuple[list, int]:
     index = 1
     result = []
 

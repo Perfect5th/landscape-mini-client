@@ -11,6 +11,8 @@ def main():
     parser = argparse.ArgumentParser(prog="landscape_mini_client")
     parser.add_argument("--debug", action="store_true",
                         help="print debug logs")
+    parser.add_argument("--timeout", default=5,
+                        help="timeout for http requests")
     subparsers = parser.add_subparsers()
 
     parser_register = subparsers.add_parser(
