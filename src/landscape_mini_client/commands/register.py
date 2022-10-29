@@ -5,10 +5,14 @@ import time
 import warnings
 
 from ..messages import MessageException, send_message
+from .. import storage
 
 
 def register(args: argparse.Namespace) -> None:
     """Registers this client with a Landscape Server instance."""
+    if storage.get("registered"):
+        logging.info("Already registered. Nothing to do.")
+        return
 
     if not args.verify:
         warnings.filterwarnings("ignore", message="unverified https")
@@ -42,6 +46,7 @@ def register(args: argparse.Namespace) -> None:
     else:
         if status_code == 200:
             logging.info("Registration request successful")
+            storage.put({"registered": True})
         else:
             logging.error(f"Registration failed. Response {status_code}")
 
