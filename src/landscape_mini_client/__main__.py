@@ -1,44 +1,36 @@
-import argparse
-import logging
 import sys
 
-from .commands.register import register
+from craft_cli import (
+    ArgumentParsingError, CommandGroup, Dispatcher, EmitterMode,
+    ProvideHelpException, emit)
+
+from .commands.register import RegisterCommand
+from .commands.storage import ClearStorageCommand
 
 
 def main():
-    args = sys.argv[1:]
+    emit.init(EmitterMode.BRIEF, "landscape-mini-client",
+              "Starting landscape mini client.")
 
-    parser = argparse.ArgumentParser(prog="landscape_mini_client")
-    parser.add_argument("--debug", action="store_true",
-                        help="print debug logs")
-    parser.add_argument("--timeout", default=5,
-                        help="timeout for http requests")
-    subparsers = parser.add_subparsers()
+    command_groups = [
+        CommandGroup("Register", [RegisterCommand]),
+        CommandGroup("Storage", [ClearStorageCommand]),
+    ]
 
-    parser_register = subparsers.add_parser(
-        "register", help="register with a Landscape Server instance")
-    parser_register.set_defaults(func=register)
-    parser_register.add_argument("--account-name", required=True)
-    parser_register.add_argument("--computer-title", required=True)
-    parser_register.add_argument("--server-host", required=True)
-    parser_register.add_argument("--registration-key", default="")
-    parser_register.add_argument("--tags", default="")
-    parser_register.add_argument("--container-info", default="")
-    parser_register.add_argument("--vm-info", default="")
-    parser_register.add_argument("--protocol", default="https")
-    parser_register.add_argument("--port", default="")
-    parser_register.add_argument(
-        "--no-verify", action="store_false", dest="verify",
-        help="Do not verify SSL/TLS")
+    summary = ("Minimal subset of user-driven Landscape Client-Server"
+               " interactions.")
+    dispatcher = Dispatcher("landscape-mini-client", command_groups,
+                            summary=summary)
 
-    results = parser.parse_args(args)
-
-    logging.basicConfig(level=logging.DEBUG if results.debug else logging.INFO)
-
-    if hasattr(results, "func"):
-        results.func(results)
+    try:
+        dispatcher.pre_parse_args(sys.argv[1:])
+        dispatcher.load_command(None)
+        dispatcher.run()
+    except (ArgumentParsingError, ProvideHelpException) as err:
+        print(err, file=sys.stderr)
+        emit.ended_ok()
     else:
-        parser.print_usage()
+        emit.ended_ok()
 
 
 if __name__ == "__main__":
