@@ -59,7 +59,7 @@ class ClientStorage(MutableMapping):
 
     def clear(self):
         with open(self._loc, "wb") as loc_fp:
-            loc_fp.truncate()
+            pickle.dump({}, loc_fp)
 
 
 def put(
