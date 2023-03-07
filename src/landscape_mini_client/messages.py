@@ -2,21 +2,21 @@ import logging
 import warnings
 
 import requests
-from requests.exceptions import (
-    ConnectionError, ConnectTimeout, ReadTimeout, SSLError)
+from requests.exceptions import ConnectionError, ConnectTimeout, ReadTimeout, SSLError
 
 from .util import bpickle
 
 
 class MessageException(Exception):
     """Exception type for failed message attempts."""
+
     pass
 
 
 def send_message(
-        url: str,
-        message: dict,
-        **kwargs,
+    url: str,
+    message: dict,
+    **kwargs,
 ) -> (int, dict):
     """
     A thin-ish wrapper around requests that adds some error logging.

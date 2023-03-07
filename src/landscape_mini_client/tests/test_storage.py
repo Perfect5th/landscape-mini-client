@@ -7,7 +7,6 @@ from .. import storage
 
 
 class PutTestCase(TestCase):
-
     def setUp(self):
         super().setUp()
 
@@ -30,8 +29,7 @@ class PutTestCase(TestCase):
         """
         Tests that put adds items to an existing, empty pickle file.
         """
-        tempfile = os.path.join(self.tempdir.name,
-                                "test_put_exists_empty.pickle")
+        tempfile = os.path.join(self.tempdir.name, "test_put_exists_empty.pickle")
 
         with open(tempfile, "w"):
             pass
@@ -61,7 +59,6 @@ class PutTestCase(TestCase):
 
 
 class GetTestCase(TestCase):
-
     def setUp(self):
         super().setUp()
 
@@ -87,8 +84,7 @@ class GetTestCase(TestCase):
         Tests that get returns None when the item does not exist in the
         pickle file.
         """
-        tempfile = os.path.join(self.tempdir.name,
-                                "test_get_not_in_file.pickle")
+        tempfile = os.path.join(self.tempdir.name, "test_get_not_in_file.pickle")
 
         with open(tempfile, "wb") as fp:
             pickle.dump({"test": "item"}, fp)
@@ -102,7 +98,7 @@ class GetTestCase(TestCase):
         Tests that get returns None when the pickle file does not exist.
         """
         tempfile = os.path.join(self.tempdir.name, "test_get_no_file.pickle")
-        
+
         result = storage.get("test", tempfile)
 
         self.assertIsNone(result)

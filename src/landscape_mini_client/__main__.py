@@ -1,26 +1,30 @@
 import sys
 
 from craft_cli import (
-    ArgumentParsingError, CommandGroup, Dispatcher, EmitterMode,
-    ProvideHelpException, emit)
+    ArgumentParsingError,
+    CommandGroup,
+    Dispatcher,
+    EmitterMode,
+    ProvideHelpException,
+    emit,
+)
 
 from .commands.register import RegisterCommand
 from .commands.storage import ClearStorageCommand
 
 
 def main():
-    emit.init(EmitterMode.BRIEF, "landscape-mini-client",
-              "Starting landscape mini client.")
+    emit.init(
+        EmitterMode.BRIEF, "landscape-mini-client", "Starting landscape mini client."
+    )
 
     command_groups = [
         CommandGroup("Register", [RegisterCommand]),
         CommandGroup("Storage", [ClearStorageCommand]),
     ]
 
-    summary = ("Minimal subset of user-driven Landscape Client-Server"
-               " interactions.")
-    dispatcher = Dispatcher("landscape-mini-client", command_groups,
-                            summary=summary)
+    summary = "Minimal subset of user-driven Landscape Client-Server" " interactions."
+    dispatcher = Dispatcher("landscape-mini-client", command_groups, summary=summary)
 
     try:
         dispatcher.pre_parse_args(sys.argv[1:])

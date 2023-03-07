@@ -10,12 +10,14 @@ class ClearStorageCommand(BaseCommand):
 
     name = "clear-storage"
     help_msg = "Clears this client's local storage."
-    overview = textwrap.dedent("""
+    overview = textwrap.dedent(
+        """
         Clear this client's local storage.
 
         Completely deletes any local state this client is maintaining,
         allowing it to start fresh.
-    """)
+    """
+    )
 
     def run(self, _):
         storage = ClientStorage()

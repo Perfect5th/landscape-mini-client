@@ -9,7 +9,6 @@ from ..util import bpickle
 
 
 class MockHTTPRequestHandler(BaseHTTPRequestHandler):
-
     def get_callback(self):
         return bpickle.dumps("test")
 
@@ -24,7 +23,7 @@ class MockHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self._respond(self.post_callback())
-        
+
     def _respond(self, response):
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "application/octet-stream")
@@ -41,7 +40,7 @@ def start_test_server(**kwargs) -> HTTPServer:
             setattr(MockHTTPRequestHandler, callback, kwargs[callback])
 
     port = kwargs.get("port", 8081)
-    server = HTTPServer(('localhost', port), MockHTTPRequestHandler)
+    server = HTTPServer(("localhost", port), MockHTTPRequestHandler)
 
     thread = Thread(target=server.serve_forever)
     thread.start()
@@ -50,7 +49,6 @@ def start_test_server(**kwargs) -> HTTPServer:
 
 
 class SendMessageTestCase(TestCase):
-
     def test_send_message_success(self):
         """
         Tests that we return the status code and payload after a message
@@ -83,10 +81,11 @@ class SendMessageTestCase(TestCase):
         Tests that we log an error and raise a MessageException if the
         connection or read times out.
         """
+
         def sleep_timeout(_):
             sleep(1)
             return b""
-        
+
         server = start_test_server(
             post_callback=sleep_timeout,
             port=8082,

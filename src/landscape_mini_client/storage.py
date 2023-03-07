@@ -62,10 +62,7 @@ class ClientStorage(MutableMapping):
             pickle.dump({}, loc_fp)
 
 
-def put(
-        item_dict: Mapping[str, any],
-        loc: str = ".lmc-storage.pickle"
-) -> None:
+def put(item_dict: Mapping[str, any], loc: str = ".lmc-storage.pickle") -> None:
     """Stores an item in persistent storage."""
     if not os.path.exists(loc):
         with open(loc, "wb") as loc_fp:

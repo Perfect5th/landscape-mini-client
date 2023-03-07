@@ -47,7 +47,7 @@ def _dumps_list(payload: List[Union[dict, list, str, int]]) -> bytes:
 
 def loads(payload: bytes) -> Tuple[Union[dict, list, str, int], int]:
     typecode = chr(payload[0])
-    
+
     if typecode == "d":
         return loads_dict(payload)
 
