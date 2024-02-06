@@ -7,13 +7,17 @@ Intended to be used for testing.
 
 Setup
 
-    $ python3 -m venv ./venv
-    $ . ./venv/bin/activate
-    $ pip install -r ./requirements.txt
+    python3 -m venv ./venv
+    . ./venv/bin/activate
+    pip install -r ./requirements.txt
 
 Register your client with a Landscape Server instance:
 
-    $ python -m src.landscape_mini_client register --account-name=standalone --computer-title=mini-client --server-host=localhost --port
+    python -m src.landscape_mini_client register \
+        --account-name=standalone \
+        --computer-title=mini-client \
+        --server-host=localhost \
+        --port=8080
 
 Most calls default to HTTPS. If it hangs because of this, try with `--protocol=http --no-verify`.
 
