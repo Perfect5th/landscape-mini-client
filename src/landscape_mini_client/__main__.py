@@ -9,7 +9,9 @@ from craft_cli import (
     emit,
 )
 
+from .commands.ping import PingCommand
 from .commands.register import RegisterCommand
+from .commands.send_message import SendMessageCommand
 from .commands.storage import ClearStorageCommand
 
 
@@ -20,6 +22,7 @@ def main():
 
     command_groups = [
         CommandGroup("Register", [RegisterCommand]),
+        CommandGroup("Exchange", [PingCommand, SendMessageCommand]),
         CommandGroup("Storage", [ClearStorageCommand]),
     ]
 

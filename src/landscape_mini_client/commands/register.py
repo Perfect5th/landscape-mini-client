@@ -51,6 +51,12 @@ def register(args: argparse.Namespace, storage: ClientStorage) -> None:
         if status_code == 200:
             emit.message("Registration request successful")
             storage["registered"] = True
+            storage["registration_info"] = {
+                "server_host": args.server_host,
+                "server_port": port,
+                "server_uuid": payload["server-uuid"].decode(),
+                "secure_id": payload["messages"][0]["id"].decode(),
+            }
         else:
             emit.message(f"Registration failed. Response {status_code}")
 

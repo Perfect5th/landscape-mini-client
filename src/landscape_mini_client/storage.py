@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import Mapping
+from typing import Any, Mapping
 
 from collections.abc import MutableMapping
 
@@ -19,7 +19,7 @@ class ClientStorage(MutableMapping):
 
     def get(self, key):
         try:
-            self[key]
+            return self[key]
         except KeyError:
             return None
 
@@ -46,7 +46,7 @@ class ClientStorage(MutableMapping):
         return stored[key]
 
     def __iter__(self):
-        return len(self._read_loc())
+        return iter(self._read_loc())
 
     def __len__(self):
         return len(self._read_loc())
@@ -62,7 +62,7 @@ class ClientStorage(MutableMapping):
             pickle.dump({}, loc_fp)
 
 
-def put(item_dict: Mapping[str, any], loc: str = ".lmc-storage.pickle") -> None:
+def put(item_dict: Mapping[str, Any], loc: str = ".lmc-storage.pickle") -> None:
     """Stores an item in persistent storage."""
     if not os.path.exists(loc):
         with open(loc, "wb") as loc_fp:
