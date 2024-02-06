@@ -23,4 +23,4 @@ Most calls default to HTTPS. If it hangs because of this, try with `--protocol=h
 
 Send a JSON-file as a message (after registration is accepted):
 
-   $ python -m src.landscape_mini_client send_message --message=./my-message.json
+    python -m src.landscape_mini_client send_message --message=./my-message.json
