@@ -56,6 +56,7 @@ def register(args: argparse.Namespace, storage: ClientStorage) -> None:
                 "server_port": port,
                 "server_uuid": payload["server-uuid"].decode(),
                 "secure_id": payload["messages"][0]["id"].decode(),
+                "insecure_id": payload["messages"][0]["insecure-id"],
             }
         else:
             emit.message(f"Registration failed. Response {status_code}")
@@ -134,6 +135,12 @@ class RegisterCommand(BaseCommand):
             help="How many seconds to wait for the server to send data before "
             "giving up",
         )
+        parser.add_argument(
+            "--storage",
+            default=".lmc-storage.pickle",
+            help="File in which to store local registration and message state "
+            "information",
+        )
 
     def run(self, parsed_args):
-        register(parsed_args, ClientStorage())
+        register(parsed_args, ClientStorage(loc=parsed_args.storage))

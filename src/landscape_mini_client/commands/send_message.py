@@ -85,6 +85,12 @@ class SendMessageCommand(BaseCommand):
             help="How many seconds to wait for the server to send data before "
             "giving up",
         )
+        parser.add_argument(
+            "--storage",
+            default=".lmc-storage.pickle",
+            help="File in which to store local registration and message state "
+            "information",
+        )
 
     def run(self, parsed_args):
-        send_prepared_message(parsed_args, ClientStorage())
+        send_prepared_message(parsed_args, ClientStorage(parsed_args.storage))

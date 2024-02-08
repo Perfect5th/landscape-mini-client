@@ -65,7 +65,7 @@ def send_message(
 
 def get(url: str, **kwargs):
     try:
-        response = requests.get(
+        response = requests.post(
             url,
             **kwargs,
             headers=API_HEADERS,

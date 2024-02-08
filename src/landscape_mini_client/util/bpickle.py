@@ -67,10 +67,9 @@ def loads(payload: bytes) -> Tuple[Union[dict, list, str, int], int]:
         return bytestring, length + len(f"s{length}:")
 
     if typecode == "b":
-        length, rest = payload[1:].split(b":", maxsplit=1)
-        length = int(length)
-        bytestring = rest[:length]
-        return bytestring, length + len(f"b{length}:")
+        length = payload.find(b";", 1)
+        number = int(payload[1:length])
+        return bool(number), len(f"b{number}")
 
     if typecode == "i":
         length = payload.find(b";", 1)
