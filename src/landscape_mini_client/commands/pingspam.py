@@ -76,7 +76,7 @@ def pingspam(servers: list[str], insecure_ids: list[str], workers: int):
     """
     q = multiprocessing.Queue()
 
-    processes = [multiprocessing.Process(target=pingloop, args=(servers, insecure_ids, q))]
+    processes = [multiprocessing.Process(target=pingloop, args=(servers, insecure_ids, q)) for _ in range(workers)]
 
     for p in processes:
         p.start()
